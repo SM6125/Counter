@@ -199,35 +199,31 @@
     <body>
         <div class="container">
             <h1>カウンター</h1>
-            <!-- カウントボタン（2系統化） -->
             <div class="counter-section">
                 <button id="inBtn" class="btn-count btn-in">IN</button>
                 <button id="outBtn" class="btn-count btn-out">OUT</button>
             </div>
 
-            <!-- 直近の統計値情報 -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="label">直近1分</div>
-                    <div id="stat1m" class="value-sub">IN: 0 / OUT: 0</div>
+                    <div id="stat1m" class="value-sub">IN: 0<br />OUT: 0</div>
                 </div>
                 <div class="stat-card">
                     <div class="label">直近3分</div>
-                    <div id="stat3m" class="value-sub">IN: 0 / OUT: 0</div>
+                    <div id="stat3m" class="value-sub">IN: 0<br />OUT: 0</div>
                 </div>
                 <div class="stat-card">
                     <div class="label">直近5分</div>
-                    <div id="stat5m" class="value-sub">IN: 0 / OUT: 0</div>
+                    <div id="stat5m" class="value-sub">IN: 0<br />OUT: 0</div>
                 </div>
             </div>
 
-            <!-- 操作ボタン -->
             <div class="actions">
                 <button id="csvBtn" class="btn btn-csv">CSV出力</button>
                 <button id="resetBtn" class="btn btn-reset">リセット</button>
             </div>
 
-            <!-- 履歴表示セクション -->
             <div class="log-section">
                 <div class="log-header">
                     <h2 class="log-title">記録</h2>
@@ -237,7 +233,6 @@
                     </div>
                 </div>
 
-                <!-- 左右に並んだ表 -->
                 <div class="log-columns">
                     <div>
                         <div class="column-title in">IN</div>
@@ -252,23 +247,21 @@
         </div>
 
         <script>
-            // 状態管理
+            const $ = (e) => document.querySelector(e);
             let attendanceLog = [];
 
-            // DOM要素の取得
-            const inBtn = document.getElementById("inBtn");
-            const outBtn = document.getElementById("outBtn");
-            const csvBtn = document.getElementById("csvBtn");
-            const resetBtn = document.getElementById("resetBtn");
-            const inLogContainer = document.getElementById("inLogContainer");
-            const outLogContainer = document.getElementById("outLogContainer");
-            const badgeTotalIn = document.getElementById("badgeTotalIn");
-            const badgeTotalOut = document.getElementById("badgeTotalOut");
-            const stat1m = document.getElementById("stat1m");
-            const stat3m = document.getElementById("stat3m");
-            const stat5m = document.getElementById("stat5m");
+            const inBtn = $("#inBtn");
+            const outBtn = $("#outBtn");
+            const csvBtn = $("#csvBtn");
+            const resetBtn = $("#resetBtn");
+            const inLogContainer = $("#inLogContainer");
+            const outLogContainer = $("#outLogContainer");
+            const badgeTotalIn = $("#badgeTotalIn");
+            const badgeTotalOut = $("#badgeTotalOut");
+            const stat1m = $("#stat1m");
+            const stat3m = $("#stat3m");
+            const stat5m = $("#stat5m");
 
-            // 日時フォーマット関数 (yyyy-mm-dd hh:mm:ss)
             function formatTimestamp(date) {
                 const yyyy = date.getFullYear();
                 const mm = String(date.getMonth() + 1).padStart(2, "0");
@@ -279,7 +272,6 @@
                 return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
             }
 
-            // アプリ初期化時のデータ読み込み
             function init() {
                 const savedData = localStorage.getItem("attendance_log_v2");
                 if (savedData) {
@@ -293,16 +285,13 @@
                 setInterval(updateStats, 1000);
             }
 
-            // ログデータ保存
             function saveData() {
                 localStorage.setItem("attendance_log_v2", JSON.stringify(attendanceLog));
             }
 
-            // カウント追加処理（typeには 'IN' または 'OUT' が入る）
             function addRecord(type) {
+                navigator.vibrate(100); // 対応端末ではハプティックフィードバックを行う
                 const now = new Date();
-
-                // それぞれのタイプの現在のカウント数を計算
                 const currentTypeCount = attendanceLog.filter((item) => item.type === type).length + 1;
 
                 const newRecord = {
@@ -312,31 +301,22 @@
                     isoString: now.toISOString(),
                 };
 
-                // 配列の先頭に追加
                 attendanceLog.unshift(newRecord);
-
                 saveData();
                 updateUI();
             }
 
-            // 画面表示（UI）の全体更新
             function updateUI() {
-                // INとOUTの配列をそれぞれ分離
                 const inRecords = attendanceLog.filter((item) => item.type === "IN");
                 const outRecords = attendanceLog.filter((item) => item.type === "OUT");
 
-                // バッジ（合計数・現在店内人数）の更新
                 badgeTotalIn.textContent = `総IN: ${inRecords.length}`;
                 badgeTotalOut.textContent = `総OUT: ${outRecords.length}`;
 
-                // 入場履歴 (IN) の描画
                 renderLogBox(inLogContainer, inRecords, "var(--primary-color)");
-                // 退場履歴 (OUT) の描画
                 renderLogBox(outLogContainer, outRecords, "var(--orange-color)");
-                // 直近統計の更新
                 updateStats();
             }
-            // 履歴ボックス描画ヘルパー
             function renderLogBox(container, records, color) {
                 container.innerHTML = "";
                 if (records.length === 0) {
@@ -350,7 +330,6 @@
                     });
                 }
             }
-            // 直近1/3/5分間のカウント算出
             function updateStats() {
                 const nowMs = Date.now();
                 const oneMinMs = 60 * 1000;
@@ -378,9 +357,9 @@
                         else out5m++;
                     }
                 });
-                stat1m.innerHTML = `IN: <b>${in1m}</b> / OUT: <b>${out1m}</b>`;
-                stat3m.innerHTML = `IN: <b>${in3m}</b> / OUT: <b>${out3m}</b>`;
-                stat5m.innerHTML = `IN: <b>${in5m}</b> / OUT: <b>${out5m}</b>`;
+                stat1m.innerHTML = `IN: <b>${in1m}</b><br />OUT: <b>${out1m}</b>`;
+                stat3m.innerHTML = `IN: <b>${in3m}</b><br />OUT: <b>${out3m}</b>`;
+                stat5m.innerHTML = `IN: <b>${in5m}</b><br />OUT: <b>${out5m}</b>`;
             }
             // CSVダウンロード機能
             function downloadCSV() {
@@ -388,13 +367,32 @@
                     alert("出力するデータがありません。");
                     return;
                 }
-                // CSVヘッダー（種別列を追加）
-                let csvContent = "種別,種別毎連番,日時\r\n";
-                // 発生した古い順（時系列順）に直して出力
+                let csvContent = "TYPE,COUNT,TIMESTAMP,TIME,LAP,DIFF,INSIDE\r\n";
                 const sortedLog = [...attendanceLog].reverse();
-                sortedLog.forEach((item) => {
-                    csvContent += `${item.type},${item.typeCount},"${item.timestamp}"\r\n`;
+                let tmpInside = 0;
+                let minInside = 0;
+
+                const tmpRows = sortedLog.map((item) => {
+                    const TIME = item.timestamp.split(" ")[1].slice(0, 5);
+                    // LAP: 直前の同TYPEのレコードからの経過時間（秒）を計算
+                    let LAP = "";
+                    const previousSameType = sortedLog.filter((prevItem) => prevItem.type === item.type && new Date(prevItem.isoString) < new Date(item.isoString));
+                    if (previousSameType.length > 0) {
+                        const lastItem = previousSameType[previousSameType.length - 1];
+                        const diffSeconds = Math.floor((new Date(item.isoString) - new Date(lastItem.isoString)) / 1000);
+                        LAP = diffSeconds;
+                    }
+                    const DIFF = item.type === "IN" ? 1 : -1;
+                    tmpInside += DIFF;
+                    if (tmpInside < minInside) minInside = tmpInside;
+                    return { item, TIME, LAP, DIFF, rawInside: tmpInside };
                 });
+                const initialPeople = Math.abs(minInside);
+                tmpRows.forEach((row) => {
+                    const INSIDE = initialPeople + row.rawInside;
+                    csvContent += `${row.item.type},${row.item.typeCount},"${row.item.timestamp}",${row.TIME},${row.LAP},${row.DIFF},${INSIDE}\r\n`;
+                });
+
                 // ダウンロード処理 (BOM付与)
                 const blob = new Blob([new Uint8Array([0xef, 0xbb, 0xbf]), csvContent], { type: "text/csv;charset=utf-8;" });
                 const url = URL.createObjectURL(blob);
@@ -406,9 +404,8 @@
                 link.click();
                 document.body.removeChild(link);
             }
-            // リセット機能
             function resetData() {
-                const confirmed = confirm("これまでの入場・退場データをすべて削除しますか？\nこの操作は取り消せません。");
+                const confirmed = confirm("これまでの入退場データをすべて削除しますか？") && confirm("本当に削除してよろしいですか？\nこの操作は元に戻せません。");
                 if (confirmed) {
                     attendanceLog = [];
                     in1m = 0;
@@ -421,12 +418,10 @@
                     updateUI();
                 }
             }
-            // イベントリスナーの登録
             inBtn.addEventListener("click", () => addRecord("IN"));
             outBtn.addEventListener("click", () => addRecord("OUT"));
             csvBtn.addEventListener("click", downloadCSV);
             resetBtn.addEventListener("click", resetData);
-            // 起動
             init();
         </script>
     </body>
